@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portál na objednávanie dresov — ukážky pre kluby</title>
+<style>
+  :root{
+    --coral:#F08573; --coral-hover:#E27060;
+    --dark:#141414; --dark-deep:#0A0A0A; --on-dark:#E8E4DF; --on-dark-dim:#A79E93;
+    --line:#2C2A27; --surface:#1B1A18; --surface-2:#221F1C;
+    --info:#D9B97F; --success:#8BBE72;
+    --radius:10px;
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--dark);color:var(--on-dark);font-family:var(--font);
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  a{color:var(--coral);}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 20px;}
+
+  /* ---- hlavička ---- */
+  .hero{border-bottom:1px solid var(--line);background:
+    radial-gradient(900px 420px at 15% -10%, rgba(240,133,115,.13), transparent 60%),
+    var(--dark-deep);padding:clamp(48px,9vh,88px) 0 clamp(40px,7vh,64px);}
+  .eyebrow{display:inline-block;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--coral);border:1px solid rgba(240,133,115,.35);border-radius:999px;
+    padding:5px 14px;margin-bottom:22px;}
+  h1{font-size:clamp(30px,5.2vw,50px);line-height:1.1;margin:0 0 18px;letter-spacing:-.5px;}
+  h1 span{color:var(--coral);}
+  .lead{font-size:clamp(16px,2.1vw,19px);color:var(--on-dark-dim);max-width:60ch;margin:0 0 28px;}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .btn{display:inline-block;background:var(--coral);color:#141414;font-weight:700;
+    text-decoration:none;padding:12px 22px;border-radius:var(--radius);font-size:15px;}
+  .btn:hover{background:var(--coral-hover);}
+  .btn-ghost{background:transparent;color:var(--on-dark);border:1px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--coral);color:var(--coral);}
+
+  /* ---- sekcie ---- */
+  section{padding:clamp(40px,7vh,68px) 0;border-bottom:1px solid var(--line);}
+  h2{font-size:clamp(20px,3vw,28px);margin:0 0 8px;letter-spacing:-.3px;}
+  .sub{color:var(--on-dark-dim);margin:0 0 28px;max-width:62ch;}
+  h3{font-size:16px;margin:0 0 6px;}
+
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;}
+  .card p{margin:0;color:var(--on-dark-dim);font-size:14px;}
+  .card .ikona{font-size:20px;margin-bottom:10px;display:block;}
+
+  /* ---- problém → riešenie ---- */
+  .proti{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+  .proti ul{margin:10px 0 0;padding-left:18px;color:var(--on-dark-dim);font-size:14px;}
+  .proti li{margin-bottom:7px;}
+  .zle{border-left:3px solid #E5615A;}
+  .dobre{border-left:3px solid var(--success);}
+
+  /* ---- kontá ---- */
+  .konta{background:var(--surface-2);border:1px solid rgba(240,133,115,.3);
+    border-radius:var(--radius);padding:20px 22px;display:grid;gap:14px;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));align-items:center;}
+  .konto b{color:var(--coral);}
+  .konto code{background:var(--dark-deep);border:1px solid var(--line);border-radius:5px;
+    padding:2px 7px;font-size:13px;color:var(--on-dark);}
+
+  /* ---- kluby ---- */
+  .kluby{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));}
+  .klub{display:flex;align-items:center;gap:13px;text-decoration:none;color:var(--on-dark);
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 16px;transition:border-color .15s,transform .15s;}
+  .klub:hover{transform:translateY(-2px);border-color:var(--coral);}
+  .znak{width:40px;height:40px;flex:none;border-radius:9px;display:grid;place-items:center;
+    font-weight:800;font-size:17px;color:#141414;}
+  .klub-meno{font-weight:700;font-size:14px;line-height:1.25;}
+  .klub-mesto{font-size:12px;color:var(--on-dark-dim);}
+
+  .pozn{font-size:13px;color:var(--on-dark-dim);background:var(--surface);
+    border-left:3px solid var(--info);border-radius:6px;padding:14px 18px;margin-top:26px;}
+  footer{padding:36px 0 56px;color:var(--on-dark-dim);font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Ukážka pre florbalové kluby</span>
+    <h1>Objednávanie dresov,<br>ktoré <span>nekončí v Exceli</span></h1>
+    <p class="lead">Rodič si dres objedná sám za dve minúty. Systém stráži obsadené čísla,
+      veľkosti aj mená na potlač. Klubu z toho vypadne hotová objednávka pre výrobcu.</p>
+    <div class="hero-actions">
+      <a class="btn" href="#kluby">Pozrieť ukážky →</a>
+      <a class="btn btn-ghost" href="#co-to-vie">Čo to vie</a>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <h2>Prečo to vzniklo</h2>
+    <p class="sub">Appka beží naostro vo florbalovom klube Warriors Bratislava od sezóny 2026.
+      Nie je to prototyp — objednali sme cez ňu celú sadu dresov.</p>
+    <div class="proti">
+      <div class="card zle">
+        <h3>Ako to chodilo predtým</h3>
+        <ul>
+          <li>Rodičia posielali čísla a veľkosti cez WhatsApp</li>
+          <li>Niekto to prepisoval do tabuľky, väčšinou večer</li>
+          <li>Dve deti si vypýtali to isté číslo</li>
+          <li>Výrobca dostal veľkosti tak, ako ich kto napísal</li>
+          <li>Po odoslaní prišli ešte tri opravy</li>
+        </ul>
+      </div>
+      <div class="card dobre">
+        <h3>Ako to chodí teraz</h3>
+        <ul>
+          <li>Rodič si vyberie z mriežky voľné číslo — obsadené si vybrať nevie</li>
+          <li>Veľkosť si vyberá zo zoznamu, nepíše ju voľne</li>
+          <li>Klub žiadosti schvaľuje jedným klikom</li>
+          <li>Objednávka pre výrobcu sa vygeneruje ako hotový dokument</li>
+          <li>História zmien ostáva, takže je jasné, kto čo kedy chcel</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="co-to-vie">
+  <div class="wrap">
+    <h2>Čo to vie dnes</h2>
+    <p class="sub">Všetko, čo vidíte v ukážkach nižšie, je hotové a používané.</p>
+    <div class="grid">
+      <div class="card"><span class="ikona">🔢</span><h3>Mriežka čísel</h3>
+        <p>Voľné, zarezervované a obsadené čísla na jeden pohľad. Brankárske čísla si drží klub.</p></div>
+      <div class="card"><span class="ikona">👕</span><h3>Náhľad dresu</h3>
+        <p>Rodič vidí meno a číslo na drese ešte pred odoslaním — aj to, keď sa meno nezmestí.</p></div>
+      <div class="card"><span class="ikona">📏</span><h3>Veľkosti podľa tabuľky</h3>
+        <p>Výber zo zoznamu s rozmermi, nie voľný text. Výrobca dostane to, čo pozná.</p></div>
+      <div class="card"><span class="ikona">👨‍👩‍👧</span><h3>Rodič s viacerými deťmi</h3>
+        <p>Jedno konto, prepínač detí. Ďalšie dieťa si rodič pridá sám, klub ho schváli.</p></div>
+      <div class="card"><span class="ikona">✅</span><h3>Schvaľovanie klubom</h3>
+        <p>Nič sa nezmení bez klubu. Žiadosti chodia do fronty aj na e-mail.</p></div>
+      <div class="card"><span class="ikona">🖨️</span><h3>Objednávka pre výrobcu</h3>
+        <p>Hotový dokument na vytlačenie alebo do PDF. Zvlášť dresy, zvlášť štulpne.</p></div>
+      <div class="card"><span class="ikona">📊</span><h3>Prehľad do CSV</h3>
+        <p>Pre klub aj s cenami, dôvodmi zmien a poznámkami rodičov.</p></div>
+      <div class="card"><span class="ikona">🔎</span><h3>Správa hráčov</h3>
+        <p>Vyhľadávanie podľa mena, čísla aj rodiča. Diakritika sa ignoruje.</p></div>
+      <div class="card"><span class="ikona">🔐</span><h3>Prístupy a role</h3>
+        <p>Rodič vidí len svoje deti. Klub vidí všetko. Nikto nevidí cudzie údaje.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Čo sa dá doplniť</h2>
+    <p class="sub">Rovnaký systém, rovnaké rodičovské kontá. Tieto veci hotové nie sú —
+      doplnia sa podľa toho, čo klub naozaj potrebuje.</p>
+    <div class="grid">
+      <div class="card"><span class="ikona">🧥</span><h3>Klubové oblečenie</h3>
+        <p>Hromadné objednávky teplák, búnd, tašiek a tričiek — rovnaký mechanizmus ako dresy.</p></div>
+      <div class="card"><span class="ikona">🥅</span><h3>Zapožičaný výstroj</h3>
+        <p>Kto má brankársku výstroj, kedy ju vrátil, ktoré číslo mal kto v ktorej sezóne.</p></div>
+      <div class="card"><span class="ikona">🎨</span><h3>Vlastné farby a logo</h3>
+        <p>Každý klub má svoje. Farby v týchto ukážkach sú len ilustračné.</p></div>
+      <div class="card"><span class="ikona">📐</span><h3>Vlastné pravidlá na čísla</h3>
+        <p>Koľko rokov musí uplynúť, kým sa číslo pridelí znova. Ktoré čísla drží klub.</p></div>
+      <div class="card"><span class="ikona">💰</span><h3>Vlastný cenník</h3>
+        <p>Ceny kusov aj zvýhodnené sady podľa toho, čo klub dohodol s výrobcom.</p></div>
+      <div class="card"><span class="ikona">🏷️</span><h3>Vlastné kategórie</h3>
+        <p>Ročníky, ktorá kategória hrá v svetlom, čo patrí do sady.</p></div>
+    </div>
+    <div class="pozn">
+      <b>Nenahrádza to klubový systém.</b> Ak už používate EOS alebo niečo podobné na dochádzku,
+      platby a komunikáciu, nechajte si to. Tento portál rieši to jedno, čo tie systémy nerobia —
+      objednávky dresov a výstroja.
+    </div>
+  </div>
+</section>
+
+<section id="kluby">
+  <div class="wrap">
+    <h2>Ukážky pre jednotlivé kluby</h2>
+    <p class="sub">Každá ukážka je plne funkčná appka s vymyslenými deťmi a rodičmi.
+      Nebeží na žiadnej databáze — všetko sa deje vo vašom prehliadači a po obnovení
+      stránky (F5) je všetko ako na začiatku.</p>
+
+    <div class="konta">
+      <div class="konto"><b>Prihlásenie ako rodič</b><br>
+        <code>rodic@demo.sk</code> · <code>Demo2026!</code></div>
+      <div class="konto"><b>Prihlásenie ako klub</b><br>
+        <code>admin@demo.sk</code> · <code>Admin2026!</code></div>
+      <div class="konto" style="color:var(--on-dark-dim);font-size:13px;">
+        Rovnaké kontá fungujú vo všetkých ukážkach.</div>
+    </div>
+
+    <div class="kluby" style="margin-top:26px;">
+      <a class="klub" href="galaktikos/"><span class="znak" style="background:#6E8BFF">G</span><span><span class="klub-meno">Športová škola Galaktikos</span><br><span class="klub-mesto">Bratislava – Nové Mesto</span></span></a>
+      <a class="klub" href="snipers/"><span class="znak" style="background:#E2574C">S</span><span><span class="klub-meno">Snipers Bratislava</span><br><span class="klub-mesto">Bratislava – Petržalka</span></span></a>
+      <a class="klub" href="hurikan/"><span class="znak" style="background:#4FB3A6">H</span><span><span class="klub-meno">VŠK FTVŠ UK Hurikán</span><br><span class="klub-mesto">Bratislava – Rača</span></span></a>
+      <a class="klub" href="tsunami/"><span class="znak" style="background:#3FA9F5">T</span><span><span class="klub-meno">Tsunami Záhorská Bystrica</span><br><span class="klub-mesto">Bratislava – Záhorská Bystrica</span></span></a>
+      <a class="klub" href="capitol/"><span class="znak" style="background:#C9A227">C</span><span><span class="klub-meno">CAPITOL Floorball Club</span><br><span class="klub-mesto">Bratislava – Rača</span></span></a>
+      <a class="klub" href="lido/"><span class="znak" style="background:#43B581">L</span><span><span class="klub-meno">Športový klub LIDO</span><br><span class="klub-mesto">Bratislava – Ružinov</span></span></a>
+      <a class="klub" href="malacky/"><span class="znak" style="background:#D94F70">M</span><span><span class="klub-meno">1. SC Malacky</span><br><span class="klub-mesto">Malacky</span></span></a>
+      <a class="klub" href="modra/"><span class="znak" style="background:#4A63E7">M</span><span><span class="klub-meno">Športový klub Modra</span><br><span class="klub-mesto">Modra</span></span></a>
+      <a class="klub" href="trencin-1fbc/"><span class="znak" style="background:#E07A3F">T</span><span><span class="klub-meno">ŠK 1. FBC Trenčín</span><br><span class="klub-mesto">Trenčín</span></span></a>
+      <a class="klub" href="grasshoppers/"><span class="znak" style="background:#7BC043">G</span><span><span class="klub-meno">FBC Grasshoppers UNIZA</span><br><span class="klub-mesto">Žilina</span></span></a>
+      <a class="klub" href="mikulas-presov/"><span class="znak" style="background:#D65A4E">M</span><span><span class="klub-meno">FBC Mikuláš Prešov</span><br><span class="klub-mesto">Prešov</span></span></a>
+      <a class="klub" href="atu-kosice/"><span class="znak" style="background:#8E7CC3">A</span><span><span class="klub-meno">FaBK ATU Košice</span><br><span class="klub-mesto">Košice</span></span></a>
+      <a class="klub" href="as-trencin/"><span class="znak" style="background:#2E9E8F">A</span><span><span class="klub-meno">FK AS Trenčín</span><br><span class="klub-mesto">Trenčín</span></span></a>
+      <a class="klub" href="harvard/"><span class="znak" style="background:#B03A48">H</span><span><span class="klub-meno">ŠK Harvard Partizánske</span><br><span class="klub-mesto">Partizánske</span></span></a>
+      <a class="klub" href="stars-lipany/"><span class="znak" style="background:#F0B429">S</span><span><span class="klub-meno">ŠŠK Stars Lipany</span><br><span class="klub-mesto">Lipany</span></span></a>
+    </div>
+
+    <div class="pozn">
+      <b>Toto nie sú oficiálne stránky klubov.</b> Sú to ukážky pripravené pre kluby,
+      ktoré by o portál mohli mať záujem. Názvy klubov sú z verejného registra SZFB,
+      farby sú zvolené len ilustračne a s reálnym vizuálom klubu nemajú nič spoločné.
+      Žiadne údaje sa neodosielajú ani neukladajú.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Portál na objednávanie dresov · pripravil Timotej Tipary, tréner FbK Warriors Bratislava<br>
+    Ukážky bežia bez databázy, celé v prehliadači.
+  </div>
+</footer>
+
+</body>
+</html>
