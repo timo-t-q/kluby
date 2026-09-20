@@ -36,12 +36,12 @@ odmietne ju vyrobiť.
 
 ```
 index.html          rozcestník — popis portálu a odkazy na ukážky
-kluby.json          zoznam klubov: názov, farba, potlač na drese
+kluby.json          farebné štýly: názov klubu, farba, potlač na drese
 generuj.js          generátor ukážok
 spolocne/
   api-demo.js       dátová vrstva demo režimu (beží v prehliadači)
   config.js         nastavenia appky bez prístupových údajov
-<klub>/index.html   ukážka pre jeden klub
+<styl>/index.html   ukážka v jednom farebnom štýle
 ```
 
 ## Ako ukážky pregenerovať
@@ -62,13 +62,16 @@ ukážku s cudzím logom alebo s odkazom na ostrú prevádzku.
 Do `kluby.json` pribudne riadok a spustí sa generátor:
 
 ```json
-{ "slug": "novy-klub", "nazov": "NOVÝ KLUB", "dres": "NOVÝ", "znak": "N",
-  "farba": "#4A63E7", "mesto": "Mesto", "plny": "Celý názov klubu" }
+{ "slug": "orechova", "styl": "Orechová", "nazov": "NOVÝ KLUB", "dres": "NOVÝ",
+  "znak": "N", "farba": "#8B5E34", "mesto": "Mesto", "plny": "Celý názov klubu" }
 ```
 
-Potom treba doplniť kartu klubu aj do `index.html`.
+Potom treba doplniť kartu štýlu aj do `index.html`.
 
 ## Upozornenie
+
+Úvodná stránka názvy klubov neuvádza — ukážky sú na nej len ako farebné štýly.
+Názov klubu je až vnútri konkrétnej ukážky, ktorá sa posiela adresne.
 
 Ukážky **nie sú oficiálne stránky klubov**. Názvy sú z verejného registra SZFB,
 farby sú zvolené ilustračne a s vizuálnou identitou klubov nemajú nič spoločné.
