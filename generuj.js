@@ -79,6 +79,14 @@ function nahrady(k) {
      '<!-- Supabase sa v ukážke nenačítava — demo beží bez databázy. -->', 1],
     ['<script defer src="/_vercel/insights/script.js"></script>', '', 1],
 
+    // --- appka do telefónu patrí len ostrej verzii (manifest ani ikony tu nie sú) ---
+    ['<!-- Appka do telefónu: v Chrome menu → Inštalovať aplikáciu -->\n' +
+     '<link rel="manifest" href="manifest.webmanifest">\n' +
+     '<meta name="theme-color" content="#141414">\n' +
+     '<link rel="icon" href="ikony/ikona-192.png" type="image/png">\n' +
+     '<link rel="apple-touch-icon" href="ikony/ikona-192.png">',
+     '', 1],
+
     // --- fonty sú o priečinok vyššie, v spolocne/ ---
     ["url('fonts/", "url('../spolocne/fonts/", 6],
 

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MALACKY — objednávanie dresov · UKÁŽKA</title>
+
 <style>
   /* ============================================================
      Fonty — hostované u nás, nie z Google Fonts CDN
@@ -483,6 +484,16 @@
   }
   .reg-suhrn .r-hodnota{color:var(--on-dark);white-space:pre-wrap;margin-bottom:10px;display:block;}
   .reg-suhrn .r-hodnota:last-child{margin-bottom:0;}
+
+  /* Upozornenia do telefónu (admin) */
+  .push-karta{
+    display:flex;align-items:center;justify-content:space-between;gap:14px 20px;flex-wrap:wrap;
+    padding:14px 18px;
+  }
+  .push-karta h4{margin:0 0 3px;font-size:14px;color:var(--on-dark);}
+  .push-karta p{margin:0;font-size:13px;color:var(--on-dark-dim);max-width:62ch;}
+  .push-karta .push-tip{display:block;margin-top:6px;color:var(--info);}
+  .push-karta.zapnute h4::before{content:'● ';color:var(--success);}
 
   /* Schvaľovanie registrácií (admin) */
   .reg-karta{
@@ -1333,6 +1344,17 @@
       <div id="objednavka-stare"></div>
     </div>
 
+    <!-- Upozornenia do telefónu — ukáže sa len tam, kde to prehliadač vie -->
+    <div class="admin-block" id="push-block" style="display:none;">
+      <div class="card push-karta" id="push-karta">
+        <div>
+          <h4 id="push-nadpis">Upozornenia do telefónu</h4>
+          <p id="push-text"></p>
+        </div>
+        <button class="btn btn-sm btn-primary" id="push-btn" onclick="prepnutUpozornenia()">Zapnúť upozornenia</button>
+      </div>
+    </div>
+
     <!-- Žiadosti rodičov o prístup -->
     <div class="admin-block" id="reg-block" style="display:none;">
       <div class="block-head">
@@ -1792,6 +1814,7 @@ function checkSetup(){
 
 async function boot(){
   if (!checkSetup()) return;
+  swPripraveny = registrujServiceWorker();
 
   // Odkaz z e-mailu nesie jednorazový kód — najprv ho overíme (prihlási používateľa)
   if (api.spracujOdkaz) await api.spracujOdkaz();
@@ -1843,6 +1866,14 @@ async function enterApp(){
     document.getElementById('user-role').textContent  = state.role === 'admin' ? 'Admin klubu' : 'Rodič / hráč';
     if (state.role === 'admin') await loadAdmin();
     else                        await loadParent();
+
+    // Otvorené z push upozornenia → rovno na žiadosti
+    const parametre = new URLSearchParams(location.search);
+    if (parametre.has('ziadosti')){
+      parametre.delete('ziadosti');
+      history.replaceState(null, '', location.pathname + (parametre.toString() ? '?' + parametre : '') + location.hash);
+      if (state.role === 'admin') otvorZiadosti(false);
+    }
   } catch (e){
     showToast(e.message, true);
     showView('login');
@@ -2256,6 +2287,131 @@ function renderDemoHint(){
     '<div><b>Rodič:</b> rodic@demo.sk · heslo <b>Demo2026!</b></div>' +
     '<div><b>Správca klubu:</b> admin@demo.sk · heslo <b>Admin2026!</b></div>' +
     '<div style="margin-top:8px;color:var(--info);">Kontá aj deti sú vymyslené. Zmeny sa nikam neukladajú — F5 vráti pôvodný stav.</div>';
+}
+
+/* ============================================================
+   UPOZORNENIA DO TELEFÓNU (Web Push, migrácia 19)
+
+   Admin si ich zapne v appke na tom zariadení, kde ich chce dostávať.
+   Keď sa zaregistruje nový rodič, databáza zavolá Edge funkciu
+   nova-ziadost-push a tá pošle do telefónu upozornenie. Ťuknutím
+   sa appka otvorí rovno na žiadostiach (?ziadosti).
+
+   Push nenesie žiadne mená — tie sa načítajú až v appke, po prihlásení.
+   V demo režime je to celé vypnuté: nie je kam posielať.
+   ============================================================ */
+const PUSH_OK = !DEMO && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+let swRegistracia = null;
+let swPripraveny  = Promise.resolve();   // boot() sem vloží registráciu, karta na ňu počká
+
+async function registrujServiceWorker(){
+  if (!PUSH_OK) return;
+  try {
+    swRegistracia = await navigator.serviceWorker.register('sw.js');
+  } catch (e){
+    console.warn('[push] service worker sa nezaregistroval:', e.message);
+    return;
+  }
+  // Ťuknutie na notifikáciu, keď je appka už otvorená na pozadí
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data && e.data.typ === 'ziadosti' && state.role === 'admin') otvorZiadosti(true);
+  });
+}
+
+// Verejný kľúč je v base64url; pushManager ho chce ako bajty
+function vapidNaBajty(kluc){
+  const t = kluc.replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(t + '='.repeat((4 - t.length % 4) % 4));
+  return Uint8Array.from(bin, c => c.charCodeAt(0));
+}
+
+async function aktualnyOdber(){
+  return swRegistracia ? swRegistracia.pushManager.getSubscription() : null;
+}
+
+async function nastavPushKartu(){
+  const blok = document.getElementById('push-block');
+  await swPripraveny;
+  if (!PUSH_OK || !swRegistracia || !CFG.VAPID_PUBLIC_KEY || !api.ulozPushOdber){
+    blok.style.display = 'none';
+    return;
+  }
+  blok.style.display = '';
+
+  const karta = document.getElementById('push-karta');
+  const text  = document.getElementById('push-text');
+  const btn   = document.getElementById('push-btn');
+  const odber = await aktualnyOdber().catch(() => null);
+  const nainstalovana = window.matchMedia('(display-mode: standalone)').matches;
+  const tip = nainstalovana ? '' :
+    '<span class="push-tip">Tip: v menu Chrome zvoľte „Inštalovať aplikáciu" — portál budete mať na ploche ako appku.</span>';
+
+  karta.classList.toggle('zapnute', !!odber && Notification.permission === 'granted');
+
+  if (Notification.permission === 'denied'){
+    text.innerHTML = 'Upozornenia sú v tomto prehliadači zablokované. Povoľte ich v nastaveniach stránky ' +
+                     '(ikona zámku vedľa adresy → Upozornenia) a obnovte stránku.';
+    btn.style.display = 'none';
+  } else if (odber){
+    text.innerHTML = 'Zapnuté na tomto zariadení. Keď sa zaregistruje nový rodič, príde vám upozornenie ' +
+                     'aj keď appku nemáte otvorenú.' + tip;
+    btn.style.display = '';
+    btn.textContent = 'Vypnúť';
+    btn.className = 'btn btn-sm btn-ghost';
+  } else {
+    text.innerHTML = 'Keď sa zaregistruje nový rodič, príde vám upozornenie do telefónu — ' +
+                     'ťuknete naň a žiadosť schválite.' + tip;
+    btn.style.display = '';
+    btn.textContent = 'Zapnúť upozornenia';
+    btn.className = 'btn btn-sm btn-primary';
+  }
+}
+
+async function prepnutUpozornenia(){
+  const btn = document.getElementById('push-btn');
+  btn.disabled = true;
+  try {
+    const odber = await aktualnyOdber();
+    if (odber){
+      await api.zmazPushOdber(odber.endpoint);
+      await odber.unsubscribe();
+      showToast('Upozornenia na tomto zariadení sú vypnuté.');
+      return;
+    }
+    const povolenie = await Notification.requestPermission();
+    if (povolenie !== 'granted'){
+      showToast('Bez povolenia upozornení to nepôjde. Povoľte ich, keď sa prehliadač opýta.', true);
+      return;
+    }
+    const novy = await swRegistracia.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: vapidNaBajty(CFG.VAPID_PUBLIC_KEY)
+    });
+    await api.ulozPushOdber(novy.toJSON(), navigator.userAgent);
+    showToast('Hotovo — o novej žiadosti vám príde upozornenie.');
+  } catch (e){
+    showToast('Upozornenia sa nepodarilo nastaviť: ' + e.message, true);
+  } finally {
+    btn.disabled = false;
+    nastavPushKartu();
+  }
+}
+
+// Prísť z notifikácie = chcem vidieť žiadosti, nie prehľad klubu
+function otvorZiadosti(obnovit){
+  const skoc = () => {
+    const blok = document.getElementById('reg-block');
+    if (!blok || blok.style.display === 'none'){
+      showToast('Žiadna žiadosť nečaká — niekto ju už vybavil.');
+      return;
+    }
+    // Hlavička je prilepená hore a na mobile má dva riadky — inak by zakryla nadpis
+    const hlavicka = document.getElementById('app-header');
+    const odsadenie = (hlavicka ? hlavicka.offsetHeight : 0) + 12;
+    window.scrollTo({ top: blok.getBoundingClientRect().top + window.scrollY - odsadenie, behavior: 'smooth' });
+  };
+  if (obnovit) loadAdmin().then(skoc).catch(e => showToast(e.message, true));
+  else skoc();
 }
 
 /* ============================================================
@@ -3347,6 +3503,7 @@ async function loadAdmin(){
 
   renderAdminView();
   showView('admin');
+  nastavPushKartu();
 }
 
 /* ============================================================
